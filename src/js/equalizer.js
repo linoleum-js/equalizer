@@ -1,14 +1,24 @@
 (function () {
   'use strict';
   
-  var previous = window.equalizer,
-    context = null,
+  var context = null,
     audio = null,
     
     filters = [],
       
     $$ = document.querySelectorAll.bind(document),
     $ = document.querySelector.bind(document),
+      
+    createContext = function () {
+      var previous = window.equalizer;
+  
+      // avoid multiple AudioContext creating
+      if (previous && previous.context) {
+        context = previous.context;
+      } else {
+        context = new AudioContext();
+      }
+    },
       
     /**
      * creates 10 input elements
@@ -138,18 +148,12 @@
     equalizer = function (param) {
       var inputs = validateParam(param);
       
+      createContext();
       createFilters();
       initInputsData(inputs);
       initEvents(inputs);
       bindEqualizer();
     };
-  
-  // avoid multiple AudioContext creating
-  if (previous && previous.context) {
-    context = previous.context;
-  } else {
-    context = new AudioContext();
-  }
   
   equalizer.context = context;
   
