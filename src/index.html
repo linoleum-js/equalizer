@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Document</title>
+</head>
+<body>
+  <audio src="assets/track.mp3" controls class="audio" id="audio"></audio>
+  <br>
+  <input type="text" class="eq-input"><br>
+  <input type="text" class="eq-input"><br>
+  <input type="text" class="eq-input"><br>
+  <input type="text" class="eq-input"><br>
+  <input type="text" class="eq-input"><br>
+  <input type="text" class="eq-input"><br>
+  <input type="text" class="eq-input"><br>
+  <input type="text" class="eq-input"><br>
+  <input type="text" class="eq-input"><br>
+  <input type="text" class="eq-input"><br>
+  
+  <script src="js/equalizer.js"></script>
+  
+  <script>
+    equalizer({
+      audio: '.audio',
+      inputs: '.eq-input'
+    });
+  </script>
+</body>
+</html>
