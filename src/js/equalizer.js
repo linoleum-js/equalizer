@@ -18,8 +18,14 @@
 }(this, function () {
   'use strict';
   
-  var context = null,
+  var
+    context = null,
+      
     audio = null,
+      
+    frequencies = [60, 170, 310, 600, 1000, 3000, 6000, 12000, 14000, 16000],
+      
+    length = frequencies.length,
     
     filters = [],
       
@@ -45,7 +51,7 @@
         node,
         i;
       
-      for (i = 0; i < 10; i++) {
+      for (i = 0; i < length; i++) {
         node = document.createElement('input');
         // remove dot
         node.className = className.slice(1);
@@ -98,8 +104,6 @@
      * create filter for each frequency
      */
     createFilters = function () {
-      var frequencies = [60, 170, 310, 600, 1000, 3000, 6000, 12000, 14000, 16000];
-      
       // create filters
       filters = frequencies.map(function (frequency) {
         return createFilter(frequency);
@@ -156,9 +160,7 @@
       var source = context.createMediaElementSource(audio);
       
       source.connect(filters[0]);
-      filters[9].connect(context.destination);
-
-      // source.connect(context.destination);
+      filters[length - 1].connect(context.destination);
     },
     
     /**
