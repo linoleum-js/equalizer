@@ -11,7 +11,6 @@
     module.exports = factory();
   } else {
     // Browser globals (root is window)
-    console.log('ok');
     root.equalizer = factory();
   }
   
@@ -33,7 +32,8 @@
     $ = document.querySelector.bind(document),
       
     createContext = function () {
-      var previous = window && window.equalizer;
+      var
+        previous = window && window.equalizer;
   
       // avoid multiple AudioContext creating
       if (previous && previous.context) {
@@ -47,7 +47,8 @@
      * creates 10 input elements
      */
     createInputs = function (className, container) {
-      var inputs = [],
+      var
+        inputs = [],
         node,
         i;
       
@@ -90,7 +91,8 @@
      * @param frequency {number}
      */
     createFilter = function (frequency) {
-      var filter = context.createBiquadFilter();
+      var
+        filter = context.createBiquadFilter();
      
       filter.type = 'peaking';
       filter.frequency.value = frequency;
@@ -157,7 +159,8 @@
      * create a chain
      */
     bindEqualizer = function () {
-      var source = context.createMediaElementSource(audio);
+      var
+        source = context.createMediaElementSource(audio);
       
       source.connect(filters[0]);
       filters[length - 1].connect(context.destination);
@@ -167,7 +170,8 @@
      * main function
      */
     equalizer = function (param) {
-      var inputs = validateParam(param);
+      var
+        inputs = validateParam(param);
       
       createContext();
       createFilters();
