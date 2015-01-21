@@ -1,7 +1,7 @@
 <h1>10-way equalizer</h1>
 
 An [article](http://habrahabr.ru/post/240819/) about how it works (_rus_)<br>
-[Lits](https://developer.mozilla.org/en-US/docs/Web/HTML/Supported_media_formats) of supported formats.
+[List](https://developer.mozilla.org/en-US/docs/Web/HTML/Supported_media_formats) of supported formats.
 
 <b>[Try it online](http://martinschulz.github.io/equalizer/)</b>
 
