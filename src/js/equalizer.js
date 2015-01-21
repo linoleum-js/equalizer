@@ -1,4 +1,21 @@
-(function () {
+(function (root, factory) {
+  'use strict';
+
+  if (typeof define === 'function' && define.amd) {
+    // AMD. Register as an anonymous module.
+    define([], factory);
+  } else if (typeof exports === 'object') {
+    // Node. Does not work with strict CommonJS, but
+    // only CommonJS-like environments that support module.exports,
+    // like Node.
+    module.exports = factory();
+  } else {
+    // Browser globals (root is window)
+    console.log('ok');
+    root.equalizer = factory();
+  }
+  
+}(this, function () {
   'use strict';
   
   var context = null,
@@ -10,7 +27,7 @@
     $ = document.querySelector.bind(document),
       
     createContext = function () {
-      var previous = window.equalizer;
+      var previous = window && window.equalizer;
   
       // avoid multiple AudioContext creating
       if (previous && previous.context) {
@@ -72,7 +89,7 @@
       filter.type = 'peaking';
       filter.frequency.value = frequency;
       filter.gain.value = 0;
-      filter.Q.value = 2;
+      filter.Q.value = 1;
 
       return filter;
     },
@@ -125,8 +142,8 @@
           param.container + '" or "' + param.selector);
       }
       
-      if (!inputs) {
-        inputs = createInputs(param.selector, container);
+      if (!inputs.length) {
+        inputs = createInputs(param.selector || '', container);
       }
       
       return inputs;
@@ -140,6 +157,8 @@
       
       source.connect(filters[0]);
       filters[9].connect(context.destination);
+
+      // source.connect(context.destination);
     },
     
     /**
@@ -157,5 +176,5 @@
   
   equalizer.context = context;
   
-  window.equalizer = equalizer;
-}());
+  return equalizer;
+}));
