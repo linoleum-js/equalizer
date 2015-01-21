@@ -1,5 +1,7 @@
 <h1>10-way equalizer</h1>
 
+An [article](http://habrahabr.ru/post/240819/) about how it works (_rus_)
+
 <h3>Usage:</h3>
 * Add script to your html:
 ```html
