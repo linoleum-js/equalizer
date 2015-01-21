@@ -17,6 +17,11 @@
 }(this, function () {
   'use strict';
   
+  // if it's not supported - do nothing
+  if (!window.AudioContext && !window.webkitAudioContext) {
+    return function () {};
+  }
+  
   var
     context = null,
       
