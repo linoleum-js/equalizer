@@ -1,6 +1,3 @@
-<<<<<<< HEAD
-<h1>10-way equalizer</h1>
-=======
 <h1>10-way equalizer</h1>
 
 <h3>Usage:</h3>
@@ -29,4 +26,3 @@ equalizer({
   container: '.my-container'
 });
 ```
->>>>>>> 89aada2e663992070b977a5694e43d04b2d4a3af
