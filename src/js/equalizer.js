@@ -20,12 +20,14 @@
   
   var
     $$ = document.querySelectorAll.bind(document),
-    $ = document.querySelector.bind(document);
+    $ = document.querySelector.bind(document),
+      
+    AudioContext = window.AudioContext || window.webkitAudioContext;
   
   var
     Equalizer = function (param) {
       // if it's not supported - do nothing
-      if (!window.AudioContext && !window.webkitAudioContext) {
+      if (!AudioContext) {
         this.trigger('error', {
           message: 'AudioContext not supported'
         }, true);
@@ -201,7 +203,7 @@
           inputs.push(item);
         });
       } else {
-        throw new TypeError('equalizer:  invalid parameter inputs: ' + param.container);
+        throw new TypeError('equalizer: invalid parameter inputs: ' + param.container);
       }
     }
     
@@ -223,6 +225,9 @@
     this.filters[this.length - 1].connect(this.context.destination);
   };
   
+  /**
+   * turn off
+   */
   Equalizer.prototype.disconnect = function () {
     this.trigger('disconnect', {});
     this.source.disconnect();
@@ -231,7 +236,14 @@
     return this;
   };
   
+  /**
+   * turn on
+   */
   Equalizer.prototype.connect = function () {
+    if (this.connected) {
+      return this;
+    }
+    
     this.trigger('connect', {});
     this.source.disconnect();
     this.source.connect(this.filters[0]);

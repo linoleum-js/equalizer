@@ -34,6 +34,8 @@ var equalizer = new Equalizer({
   // css selector of container element or element itself
   container: '.my-container'
 });
+// You have to specify inputs (if they're already created) OR container,
+// if you want to create inputs dynamically
 // (jQuery objects are also allowed)
 
 // then you can turn off it
@@ -41,6 +43,7 @@ equalizer.disconnect();
 // and turn on
 equalizer.connect();
 ```
+
 Also there's couple of events:
 ```javascript
 new Equalizer({
