@@ -226,7 +226,7 @@
   Equalizer.prototype.disconnect = function () {
     this.trigger('disconnect', {});
     this.source.disconnect();
-    this.source.connect(window.__context.destination);
+    this.source.connect(this.destination);
     
     return this;
   };
