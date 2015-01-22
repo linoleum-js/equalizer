@@ -18,27 +18,31 @@
 }(this, function () {
   'use strict';
   
-  // if it's not supported - do nothing
-  if (!window.AudioContext && !window.webkitAudioContext) {
-    return function () {};
-  }
-  
   var
     $$ = document.querySelectorAll.bind(document),
     $ = document.querySelector.bind(document);
   
   var
     Equalizer = function (param) {
+      // if it's not supported - do nothing
+      if (!window.AudioContext && !window.webkitAudioContext) {
+        this.trigger('error', {
+          message: 'AudioContext not supported'
+        }, true);
+        
+        return;
+      }
+      
       /** AudioContext object */
-      this.context = (function () {
-        // avoid multiple AudioContext creating
-        return (window.Equalizer && window.Equalizer.context) ||
-          new AudioContext();
-      }());
+      // avoid multiple AudioContext creating
+      this.context = window.__context || new AudioContext();
+      window.__context = this.context;
 
       this.frequencies = [60, 170, 310, 600, 1000, 3000, 6000, 12000, 14000, 16000];
 
       this.length = this.frequencies.length;
+      
+      this.connected = false;
     
       this.initInputs(param);
       
@@ -47,6 +51,9 @@
       this.initEvents();
       this.connectEqualizer();
     };
+  
+  // <### pubsub ###>
+  addPubsub(Equalizer);
 
   /**
    * creates input elements
@@ -91,6 +98,12 @@
     [].forEach.call(this.inputs, function (item, i) {
       item.addEventListener('change', function (e) {
         self.filters[i].gain.value = e.target.value;
+        
+        self.trigger('change', {
+          value: e.target.value,
+          inputElement: e.target,
+          index: i
+        });
       }, false);
     });
   };
@@ -128,6 +141,9 @@
 
   /**
    * check param and create input elements if necessary
+   *
+   * @holycrap {WTF} Why Must Life Be So Hard http://www.youtube.com/watch?v=rH48caFgZcI
+   *
    * @returns {array|NodeList} input elements
    */
   Equalizer.prototype.initInputs = function (param) {
@@ -136,8 +152,8 @@
     }
 
     var
-      container = $(param.container),
-      inputs = $$(param.inputs);
+      container,
+      inputs = [];
 
     if (param.audio instanceof HTMLMediaElement) {
       this.audio = param.audio;
@@ -151,14 +167,47 @@
     } else {
       throw new TypeError('equalizer: parameter "audio" must be string or an audio element');
     }
-
-    if (!container && !inputs.length) {
-      throw new TypeError('equalizer: there\'s no elements match "' +
-        param.container + '" or "' + param.selector);
-    }
-
-    if (!inputs.length) {
+    
+    // container specified
+    if (param.container) {
+      // css selector
+      if (typeof param.container === 'string') {
+        container = $(param.container);
+        if (!container) {
+          throw new TypeError('equalizer: there\'s no element that match selector' +
+            param.container);
+        }
+        // plain html element
+      } else if (param.container instanceof HTMLElement) {
+        container = param.container;
+        // jquery object
+      } else if (param.container.jquery && param.container[0]) {
+        container = param.container[0];
+      } else {
+        throw new TypeError('equalizer: invalid parameter container: ' + param.container);
+      }
+      
       inputs = this.createInputs(container);
+    } else {
+      // no container
+      if (typeof param.inputs === 'string') {
+        inputs = $$(param.inputs);
+        // plainh html collection
+      } else if (param.inputs instanceof NodeList) {
+        inputs = param.inputs;
+        // jquery object
+      } else if (param.inputs.jquery) {
+        param.inputs.each(function (i, item) {
+          inputs.push(item);
+        });
+      } else {
+        throw new TypeError('equalizer:  invalid parameter inputs: ' + param.container);
+      }
+    }
+    
+    if (inputs.length !== this.length) {
+      throw new TypeError('equalizer: required exactly ' + this.length + ' elements, but ' +
+        inputs.length + ' found');
     }
     
     this.inputs = inputs;
@@ -168,11 +217,26 @@
    * create a chain
    */
   Equalizer.prototype.connectEqualizer = function () {
-    var
-      source = this.context.createMediaElementSource(this.audio);
+    this.source = this.context.createMediaElementSource(this.audio);
 
-    source.connect(this.filters[0]);
+    this.source.connect(this.filters[0]);
     this.filters[this.length - 1].connect(this.context.destination);
+  };
+  
+  Equalizer.prototype.disconnect = function () {
+    this.trigger('disconnect', {});
+    this.source.disconnect();
+    this.source.connect(window.__context.destination);
+    
+    return this;
+  };
+  
+  Equalizer.prototype.connect = function () {
+    this.trigger('connect', {});
+    this.source.disconnect();
+    this.source.connect(this.filters[0]);
+    
+    return this;
   };
   
   return Equalizer;
