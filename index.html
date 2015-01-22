@@ -2,20 +2,20 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <link rel="stylesheet" href="style/style.css">
+  <link rel="stylesheet" href="src/style/style.css">
   <title>Document</title>
 </head>
 <body>
   <audio controls loop class="audio" id="audio">
-    <source src="assets/file.mp3">
-    <source src="assets/file.ogg">
+    <source src="src/assets/file.mp3">
+    <source src="src/assets/file.ogg">
   </audio>
 
   <div class="eq-wrap"></div>
   <input type="file" id="file">
   
-  <script src="js/util/pubsub.js"></script>
-  <script src="js/equalizer.js"></script>
+  <script src="src/js/util/pubsub.js"></script>
+  <script src="src/js/equalizer.js"></script>
   
   <script>
     new Equalizer({
