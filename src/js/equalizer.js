@@ -1,3 +1,4 @@
+
 (function (root, factory) {
   'use strict';
 
@@ -11,7 +12,7 @@
     module.exports = factory();
   } else {
     // Browser globals (root is window)
-    root.equalizer = factory();
+    root.Equalizer = factory();
   }
   
 }(this, function () {
@@ -23,166 +24,156 @@
   }
   
   var
-    /** AudioContext object */
-    context = (function () {
-      // avoid multiple AudioContext creating
-      return (window.equalizer && window.equalizer.context) ||
-        new AudioContext();
-    }()),
-      
-    /** HTMLMediaelement */
-    audio = null,
-      
-    frequencies = [60, 170, 310, 600, 1000, 3000, 6000, 12000, 14000, 16000],
-      
-    length = frequencies.length,
-    /** contains BiquadFilter objects */
-    filters = [],
-      
     $$ = document.querySelectorAll.bind(document),
-    $ = document.querySelector.bind(document),
+    $ = document.querySelector.bind(document);
+  
+  var
+    Equalizer = function (param) {
+      /** AudioContext object */
+      this.context = (function () {
+        // avoid multiple AudioContext creating
+        return (window.Equalizer && window.Equalizer.context) ||
+          new AudioContext();
+      }());
 
-    /**
-     * creates input elements
-     * @param {string} className
-     * @param {HTMLElement} container
-     * @returns [HTMLElement]
-     */
-    createInputs = function (className, container) {
-      var
-        inputs = [],
-        node,
-        i;
-      
-      for (i = 0; i < length; i++) {
-        node = document.createElement('input');
-        // without dot
-        node.className = className.slice(1);
-        container.appendChild(node);
-        inputs.push(node);
-      }
-      
-      return inputs;
-    },
-    
-    /**
-     * init inputs range and step
-     */
-    initInputsAttrs = function (inputs) {
-      [].forEach.call(inputs, function (item) {
-        item.setAttribute('min', -16);
-        item.setAttribute('max', 16);
-        item.setAttribute('step', 0.1);
-        item.setAttribute('value', 0);
-        item.setAttribute('type', 'range');
-      });
-    },
-    
-    /**
-     * bind input.change events to the filters
-     */
-    initEvents = function (inputs) {
-      [].forEach.call(inputs, function (item, i) {
-        item.addEventListener('change', function (e) {
-          filters[i].gain.value = e.target.value;
-        }, false);
-      });
-    },
-    
-    /**
-     * creates single BiquadFilter object
-     * @param frequency {number}
-     * @returns {BiquadFilter}
-     */
-    createFilter = function (frequency) {
-      var
-        filter = context.createBiquadFilter();
-     
-      filter.type = 'peaking';
-      filter.frequency.value = frequency;
-      filter.gain.value = 0;
-      filter.Q.value = 1;
+      this.frequencies = [60, 170, 310, 600, 1000, 3000, 6000, 12000, 14000, 16000];
 
-      return filter;
-    },
+      this.length = this.frequencies.length;
     
-    /**
-     * create filter for each frequency and connect 
-     */
-    createFilters = function () {
-      // create filters
-      filters = frequencies.map(createFilter);
+      this.initInputs(param);
       
-      // create chain
-      filters.reduce(function (prev, curr) {
-        prev.connect(curr);
-        return curr;
-      });
-    },
-    
-    /**
-     * check param and create input elements if necessary
-     * @returns {array|NodeList} input elements
-     */
-    getInputs = function (param) {
-      if (!param) {
-        throw new TypeError('equalizer: param required');
-      }
-      
-      var
-        container = $(param.container),
-        inputs = $$(param.inputs);
-      
-      if (param.audio instanceof HTMLMediaElement) {
-        audio = param.audio;
-      } else if (typeof param.audio === 'string') {
-        audio = $(param.audio);
-        
-        if (!audio) {
-          throw new TypeError('equalizer: there\'s no element that match selector' +
-            param.audio);
-        }
-      } else {
-        throw new TypeError('equalizer: parameter "audio" must be string or an audio element');
-      }
-      
-      if (!container && !inputs.length) {
-        throw new TypeError('equalizer: there\'s no elements match "' +
-          param.container + '" or "' + param.selector);
-      }
-      
-      if (!inputs.length) {
-        inputs = createInputs(param.selector || '', container);
-      }
-      
-      return inputs;
-    },
-    
-    /**
-     * create a chain
-     */
-    connectEqualizer = function () {
-      var
-        source = context.createMediaElementSource(audio);
-      
-      source.connect(filters[0]);
-      filters[length - 1].connect(context.destination);
-    },
-    
-    /**
-     * main function
-     */
-    equalizer = function (param) {
-      var
-        inputs = getInputs(param);
-      
-      createFilters();
-      initInputsAttrs(inputs);
-      initEvents(inputs);
-      connectEqualizer();
+      this.createFilters();
+      this.initInputsAttrs();
+      this.initEvents();
+      this.connectEqualizer();
     };
+
+  /**
+   * creates input elements
+   * @param {HTMLElement} container
+   * @returns [HTMLElement]
+   */
+  Equalizer.prototype.createInputs = function (container) {
+    var
+      inputs = [],
+      node,
+      i;
+
+    for (i = 0; i < this.length; i++) {
+      node = document.createElement('input');
+      container.appendChild(node);
+      inputs.push(node);
+    }
+
+    return inputs;
+  };
+    
+  /**
+   * init inputs range and step
+   */
+  Equalizer.prototype.initInputsAttrs = function () {
+    [].forEach.call(this.inputs, function (item) {
+      item.setAttribute('min', -16);
+      item.setAttribute('max', 16);
+      item.setAttribute('step', 0.1);
+      item.setAttribute('value', 0);
+      item.setAttribute('type', 'range');
+    });
+  };
+    
+  /**
+   * bind input.change events to the filters
+   */
+  Equalizer.prototype.initEvents = function () {
+    var
+      self = this;
+    
+    [].forEach.call(this.inputs, function (item, i) {
+      item.addEventListener('change', function (e) {
+        self.filters[i].gain.value = e.target.value;
+      }, false);
+    });
+  };
+
+  /**
+   * creates single BiquadFilter object
+   * @param frequency {number}
+   * @returns {BiquadFilter}
+   */
+  Equalizer.prototype.createFilter = function (frequency) {
+    var
+      filter = this.context.createBiquadFilter();
+
+    filter.type = 'peaking';
+    filter.frequency.value = frequency;
+    filter.gain.value = 0;
+    filter.Q.value = 1;
+
+    return filter;
+  };
+
+  /**
+   * create filter for each frequency and connect 
+   */
+  Equalizer.prototype.createFilters = function () {
+    // create filters
+    this.filters = this.frequencies.map(this.createFilter.bind(this));
+
+    // create chain
+    this.filters.reduce(function (prev, curr) {
+      prev.connect(curr);
+      return curr;
+    });
+  };
+
+  /**
+   * check param and create input elements if necessary
+   * @returns {array|NodeList} input elements
+   */
+  Equalizer.prototype.initInputs = function (param) {
+    if (!param) {
+      throw new TypeError('equalizer: param required');
+    }
+
+    var
+      container = $(param.container),
+      inputs = $$(param.inputs);
+
+    if (param.audio instanceof HTMLMediaElement) {
+      this.audio = param.audio;
+    } else if (typeof param.audio === 'string') {
+      this.audio = $(param.audio);
+
+      if (!this.audio) {
+        throw new TypeError('equalizer: there\'s no element that match selector' +
+          param.audio);
+      }
+    } else {
+      throw new TypeError('equalizer: parameter "audio" must be string or an audio element');
+    }
+
+    if (!container && !inputs.length) {
+      throw new TypeError('equalizer: there\'s no elements match "' +
+        param.container + '" or "' + param.selector);
+    }
+
+    if (!inputs.length) {
+      inputs = this.createInputs(container);
+    }
+    
+    this.inputs = inputs;
+  };
+
+  /**
+   * create a chain
+   */
+  Equalizer.prototype.connectEqualizer = function () {
+    var
+      source = this.context.createMediaElementSource(this.audio);
+
+    source.connect(this.filters[0]);
+    this.filters[this.length - 1].connect(this.context.destination);
+  };
   
-  equalizer.context = context;
-  
-  return equalizer;
+  return Equalizer;
 }));
