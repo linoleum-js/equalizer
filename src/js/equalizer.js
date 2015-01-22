@@ -23,33 +23,30 @@
   }
   
   var
-    context = null,
+    /** AudioContext object */
+    context = (function () {
+      // avoid multiple AudioContext creating
+      return (window.equalizer && window.equalizer.context) ||
+        new AudioContext();
+    }()),
       
+    /** HTMLMediaelement */
     audio = null,
       
     frequencies = [60, 170, 310, 600, 1000, 3000, 6000, 12000, 14000, 16000],
       
     length = frequencies.length,
-    
+    /** contains BiquadFilter objects */
     filters = [],
       
     $$ = document.querySelectorAll.bind(document),
     $ = document.querySelector.bind(document),
-      
-    createContext = function () {
-      var
-        previous = window && window.equalizer;
-  
-      // avoid multiple AudioContext creating
-      if (previous && previous.context) {
-        context = previous.context;
-      } else {
-        context = new AudioContext();
-      }
-    },
-      
+
     /**
-     * creates 10 input elements
+     * creates input elements
+     * @param {string} className
+     * @param {HTMLElement} container
+     * @returns [HTMLElement]
      */
     createInputs = function (className, container) {
       var
@@ -59,7 +56,7 @@
       
       for (i = 0; i < length; i++) {
         node = document.createElement('input');
-        // remove dot
+        // without dot
         node.className = className.slice(1);
         container.appendChild(node);
         inputs.push(node);
@@ -71,7 +68,7 @@
     /**
      * init inputs range and step
      */
-    initInputsData = function (inputs) {
+    initInputsAttrs = function (inputs) {
       [].forEach.call(inputs, function (item) {
         item.setAttribute('min', -16);
         item.setAttribute('max', 16);
@@ -93,7 +90,9 @@
     },
     
     /**
+     * creates single BiquadFilter object
      * @param frequency {number}
+     * @returns {BiquadFilter}
      */
     createFilter = function (frequency) {
       var
@@ -108,13 +107,11 @@
     },
     
     /**
-     * create filter for each frequency
+     * create filter for each frequency and connect 
      */
     createFilters = function () {
       // create filters
-      filters = frequencies.map(function (frequency) {
-        return createFilter(frequency);
-      });
+      filters = frequencies.map(createFilter);
       
       // create chain
       filters.reduce(function (prev, curr) {
@@ -124,15 +121,16 @@
     },
     
     /**
-     * check param
+     * check param and create input elements if necessary
      * @returns {array|NodeList} input elements
      */
-    validateParam = function (param) {
+    getInputs = function (param) {
       if (!param) {
         throw new TypeError('equalizer: param required');
       }
       
-      var container = $(param.container),
+      var
+        container = $(param.container),
         inputs = $$(param.inputs);
       
       if (param.audio instanceof HTMLMediaElement) {
@@ -163,7 +161,7 @@
     /**
      * create a chain
      */
-    bindEqualizer = function () {
+    connectEqualizer = function () {
       var
         source = context.createMediaElementSource(audio);
       
@@ -176,13 +174,12 @@
      */
     equalizer = function (param) {
       var
-        inputs = validateParam(param);
+        inputs = getInputs(param);
       
-      createContext();
       createFilters();
-      initInputsData(inputs);
+      initInputsAttrs(inputs);
       initEvents(inputs);
-      bindEqualizer();
+      connectEqualizer();
     };
   
   equalizer.context = context;

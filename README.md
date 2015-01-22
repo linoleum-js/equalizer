@@ -25,10 +25,10 @@ require([
 * Use it:
 ```javascript
 equalizer({
-  audio: '.my-audio-element', // selector of your audio element (existing)
-  inputs: '.my-inputs', // selector of input elements, if they already exist.
+  audio: '.my-audio-element', // class (!) of your audio element (existing)
+  inputs: '.my-inputs', // class (!) of input elements, if they already exist.
   // otherwise, you can specify container element (existing).
   // input elements will be created and append to this container.
-  container: '.my-container'
+  container: '.my-container' // class (!) of container element
 });
 ```
