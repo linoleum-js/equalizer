@@ -25,11 +25,14 @@ require([
 * Use it:
 ```javascript
 var equalizer = new Equalizer({
-  audio: '.my-audio-element', // css selector of your audio element or element itself (existing)
-  inputs: '.my-inputs', // css selector of input elements or NodeList itself, if they already exist
+  // css selector of your audio element or element itself (existing)
+  audio: '.my-audio-element',
+  // css selector of input elements or NodeList itself, if they already exist
+  inputs: '.my-inputs',
   // otherwise, you can specify container element (existing).
   // input elements will be created and append to this container.
-  container: '.my-container' // css selector of container element or element itself
+  // css selector of container element or element itself
+  container: '.my-container'
 });
 // (jQuery objects are also allowed)
 
