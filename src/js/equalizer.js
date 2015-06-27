@@ -229,6 +229,10 @@
    * turn off
    */
   Equalizer.prototype.disconnect = function () {
+    if (!this.connected) {
+      return this;
+    }
+    
     this.trigger('disconnect', {});
     this.source.disconnect();
     this.source.connect(this.destination);
